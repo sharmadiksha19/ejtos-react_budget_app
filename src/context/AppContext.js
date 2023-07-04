@@ -4,6 +4,7 @@ import React, { createContext, useReducer } from 'react';
 export const AppReducer = (state, action) => {
     let budget = 0;
     switch (action.type) {
+        //changes applied for task 1,5
         case 'ADD_EXPENSE':
             let total_budget = 0;
             total_budget = state.expenses.reduce(
@@ -57,25 +58,39 @@ export const AppReducer = (state, action) => {
                 ...state,
                 budget
             };
-        case 'SET_BUDGET':
-            action.type = "DONE";
-            state.budget = action.payload;
-
-            return {
-                ...state,
-            };
-        case 'CHG_CURRENCY':
-            action.type = "DONE";
-            state.currency = action.payload;
-            return {
-                ...state
-            }
+            //changes for task 3
+            case 'SET_BUDGET':
+                if (action.payload > 20000) {
+                    alert("Budget cannot exceed £20000");
+                    return state;
+                }
+    
+                const totalExpenses = state.expenses.reduce((total, item) => {
+                    return (total = total + item.cost);
+                }, 0);
+    
+                if (action.payload < totalExpenses) {
+                    alert("The budget cannot be lower than the total spending!");
+                    return state;
+                }
+    
+                return {
+                    ...state,
+                    budget: action.payload,
+                };
+                case 'CHG_CURRENCY':
+                    action.type = "DONE";
+                    state.currency = action.payload;
+                return {
+                        ...state,
+                        currency: action.payload,
+                }
 
         default:
             return state;
     }
 };
-
+//task 5
 // 1. Sets the initial state when the app loads
 const initialState = {
     budget: 2000,
@@ -86,7 +101,7 @@ const initialState = {
         { id: "Human Resource", name: 'Human Resource', cost: 40 },
         { id: "IT", name: 'IT', cost: 500 },
     ],
-    currency: '£'
+    currency: '$',
 };
 
 // 2. Creates the context this is the thing our components import and use to get the state
@@ -106,6 +121,13 @@ export const AppProvider = (props) => {
         remaining = state.budget - totalExpenses;
     }
 
+    const handleCurrencyChange = (currency) => {
+        dispatch({
+          type: 'CHG_CURRENCY',
+          payload: currency,
+        });
+      };
+      //task 5,7
     return (
         <AppContext.Provider
             value={{
@@ -113,9 +135,10 @@ export const AppProvider = (props) => {
                 budget: state.budget,
                 remaining: remaining,
                 dispatch,
-                currency: state.currency
-            }}
-        >
+                currency: state.currency,
+                handleCurrencyChange: handleCurrencyChange, // Adding the currency change handler
+      }}
+    >
             {props.children}
         </AppContext.Provider>
     );
